@@ -11,6 +11,7 @@ const { localStrategy, localStrategySlow } = require('./localStrategy')
 const radiusStrategy = require('./radiusStrategy')
 const jwtStrategy = require('./jwtStrategy')
 const oauthStrategy = require('./oauthStrategy')
+const oauthManualStrategy = require('./oauthManualStrategy')
 const oidcStrategy = require('./oidcStrategy')
 
 const tokenGenerator = require('./tokenGenerator')
@@ -102,6 +103,15 @@ const GITHUB_CLIENT_SECRET = 'ffbfb6639f2005ffce9e1a44d6535bbfc570f325'
 
     app.get('/auth/github/callback',
       passport.authenticate('oauth2', { failureRedirect: '/login', session: false }),
+      function (req, res) {
+        const token = tokenGenerator(req.user.username, jwtSecret)
+
+        res.cookie('jwt', token, { httpOnly: true, secure: true })
+        res.redirect('/')
+      });
+
+    app.get('/auth/github_manual/callback',
+      oauthManualStrategy,
       function (req, res) {
         const token = tokenGenerator(req.user.username, jwtSecret)
 
